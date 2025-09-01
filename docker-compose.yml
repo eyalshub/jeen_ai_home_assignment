@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg15  
+    container_name: jeen_pgvector
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jeen_chunks
+    ports:
+      - "5433:5432"  # Leaves the port open for external access
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Saves the data even after reboot
+
+volumes:
+  pgdata:
