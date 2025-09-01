@@ -238,3 +238,5 @@ with get_connection() as conn:
         cur.execute("DELETE FROM chunks;")
         conn.commit()
 
+
+<img width="784" height="410" alt="image" src="https://github.com/user-attachments/assets/a77d00b3-82f2-4d38-bd77-edd3146ff760" />
