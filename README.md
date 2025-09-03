@@ -288,4 +288,5 @@ with get_connection() as conn:
         conn.commit()
 
 
-<img width="784" height="410" alt="image" src="https://github.com/user-attachments/assets/a77d00b3-82f2-4d38-bd77-edd3146ff760" />
+<img width="919" height="399" alt="image" src="https://github.com/user-attachments/assets/3458bb82-5de7-4513-a542-e2fcaba99b80" />
+
