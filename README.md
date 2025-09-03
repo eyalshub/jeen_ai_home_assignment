@@ -5,10 +5,10 @@
 As part of the Jeen.ai Home Assignment, I chose to design and implement a **modular, testable, and extensible RAG pipeline** to enable easy future enhancements and experimentation.
 
 ### 💡 Key Design Decisions
-
 - 🔧 **Modular Architecture** – Each component (e.g., chunking, embedding, database) is isolated and swappable.
 - 🧪 **Full Test Coverage** – Unit tests were written for all core functionalities to ensure correctness and stability.
 - 🐳 **Dockerized Environment** – PostgreSQL with `pgvector` runs inside Docker for easy setup and portability across machines.
+- ♻️ **Connection Pooling** – Efficient and safe PostgreSQL connections via `ThreadedConnectionPool`.
 
 > 🎯 The goal was to build a clean, maintainable, and production-ready solution — not just a proof-of-concept script.
 
@@ -52,55 +52,46 @@ It consists of two main scripts:
 - ✅ **Clean, modular codebase**  
   Organized into logical components (`embedder`, `chunker`, `database`, etc.) for easy maintenance and extension.
 
+- ✅ **Efficient connection management**  
+  Uses `psycopg2.pool.ThreadedConnectionPool` to safely handle multiple concurrent DB queries without exhausting connections.
+
 ---
+
 ## ⚙️ Setup Instructions
 
-### 1. Clone the repository
+### 1. Clone the repository & set up environment
 
 ```bash
 git clone https://github.com/your_username/jeen_ai_home_assignment.git
 cd jeen_ai_home_assignment
 
-### 2. Create a virtual environment
-
-```bash
 python -m venv .venv
 .venv\Scripts\activate  # On Windows
 # source .venv/bin/activate  # On Mac/Linux
-```
 
-### 3. Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Create a `.env` file
 
-```env
+
+Create a file named `.env` in the project root and copy the following template:
+
 # Gemini API
 GEMINI_API_KEY=your_gemini_api_key_here
-
+...
 # PostgreSQL
 POSTGRES_DB=jeen_ai
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
-```
 
-> ⚠️ **Important:** Make sure `.env` is listed in your `.gitignore`.
 
----
 
-## 🧪 Run Tests
-
-To run unit tests with verbose output:
-
+⚠️ Make sure PostgreSQL is running and the pgvector extension is installed.
 ```bash
 pytest test_search_documents.py -v
 ```
-
 This will run all 10+ test cases, including:
 
 - Embedding-based similarity sorting  
@@ -109,33 +100,25 @@ This will run all 10+ test cases, including:
 - Score range validation  
 - Handling of edge cases like blank queries or empty database
 
----
 
-## 🚀 Run the Pipeline
+python index_documents.py samples/sample.docx --strategy fixed
 
-### 1. Index a document
+Supported formats:
+- .docx
+- .pdf
 
-```bash
-python index_documents.py samples/sample.docx fixed
-```
+Supported chunking strategies:
+- fixed – chunks by word count
+- sentence – sentence-level split
+- paragraph – paragraph-level split
 
-- Supported formats: `.docx`, `.pdf`
-- Supported chunking strategies:
-  - `fixed`
-  - `sentence`
-  - `paragraph`
 
-### 2. Search documents
-
-Use inside Python:
-
-```python
 from search_documents import search_documents
 
 results = search_documents("What is semantic search?")
 for r in results:
     print(r["chunk_text"], "→ score:", r["score"])
-```
+
 
 ---
 
@@ -143,18 +126,40 @@ for r in results:
 
 ```
 .
-├── index_documents.py
-├── search_documents.py
-├── embedder.py
-├── database.py
-├── extractor.py
-├── chunker.py
-├── test_search_documents.py
-├── samples/
-├── .env             # Not tracked by Git
-├── .gitignore
-├── requirements.txt
-└── README.md
+├── index_documents.py               # CLI script: process and index documents
+├── search_documents.py              # CLI script: semantic search interface
+├── docker-compose.yml               # PostgreSQL + pgvector setup
+├── requirements.txt                 # Python dependencies
+├── .env                             # Environment variables (not tracked by Git)
+├── .gitignore                       # Git exclusions
+├── README.md                        # Project documentation
+
+├── helper/                          # Core logic modules
+│   ├── chunker.py                   # Text splitting strategies (fixed, sentence, paragraph)
+│   ├── embedder.py                 # Gemini-based embedding generation
+│   ├── extractor.py                # PDF and DOCX file text extraction
+│   └── database.py                 # DB schema, insertion, querying, pooling
+│   └── reset_db.py                 #   Cleanly restart the database
+│   └── setup_db.py                 #  Initialize the database   
+├── tests/                           # Unit tests (pytest)
+│   ├── test_chunker.py
+│   ├── test_embedder.py
+│   ├── test_extractor.py
+│   ├── test_database.py
+│   ├── test_index_documents.py
+│   └── test_search_documents.py
+
+├── samples/                         # Example documents for testing
+│   ├── sample.docx
+│   ├── file-sample_150kB.pdf
+│   └── file-sample_500kB.docx
+│   └── Generative_AI.docx
+│   └── sample.docx
+│   └── ai_overview_long.pdf
+│   └── encoding_vs_decoding.docx
+
+├── photos/                          # Photos from the launch and all stages of the project
+│   └── jeen.....
 ```
 
 ---
@@ -164,6 +169,8 @@ for r in results:
 - ✅ Environment variables are stored in a `.env` file (excluded from Git)
 - ✅ API keys and DB credentials are never exposed in code
 - ✅ Secure handling of external API calls (Gemini)
+- ✅ Exception handling with detailed logging  
+  All core functions log errors gracefully with context-aware messages (e.g., failed chunk insertions).
 
 ---
 

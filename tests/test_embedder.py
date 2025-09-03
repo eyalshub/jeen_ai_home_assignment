@@ -1,6 +1,6 @@
-# test_embedder.py
+# tests/test_embedder.py
 
-from embedder import get_embedding
+from helper.embedder import get_embedding
 import pytest
 
 def test_embedding_length():
@@ -19,3 +19,18 @@ def test_empty_string():
     with pytest.raises(ValueError):
         get_embedding("")
 
+
+@pytest.mark.parametrize("text", [
+    "Short.",
+    "This is a longer sentence used for testing the robustness of the embedding function.",
+    "🚀 Emojis and special characters like ©, ™, ∆ should be handled too.",
+])
+def test_various_texts(text):
+    embedding = get_embedding(text)
+    assert isinstance(embedding, list)
+    assert len(embedding) == 768
+
+
+def test_whitespace_only():
+    with pytest.raises(ValueError):
+        get_embedding("   ")

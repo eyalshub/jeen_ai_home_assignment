@@ -1,9 +1,11 @@
-# embedder.py
+# helper/embedder.py
 
 import os
 from typing import List
 import google.generativeai as genai
 from dotenv import load_dotenv
+
+
 
 # Load GEMINI_API_KEY from .env
 load_dotenv()
@@ -20,13 +22,19 @@ DEFAULT_MODEL = "models/text-embedding-004"
 EMBEDDING_DIM = 768
 
 
+
+
 def get_embedding(text: str, model: str = DEFAULT_MODEL) -> List[float]:
     """
     Generates a text embedding using Google Gemini API.
     Returns a list of floats with length 768 (for model=text-embedding-004).
+    Raises:
+        ValueError: on empty text or invalid embedding response
+        RuntimeError: on API/SDK/network failures
     """
-    if not text.strip():
+    if not isinstance(text, str) or not text.strip():
         raise ValueError("Text is empty – cannot generate embedding.")
+
 
     try:
         res = genai.embed_content(

@@ -1,18 +1,17 @@
-# test_search_documents.py
+# tests/test_search_documents.py
 
 import pytest
 import numpy as np
 from search_documents import search_documents
-from database import get_connection, insert_chunk
-
+from helper.database import get_connection, insert_chunk
+from helper.database import pooled_connection
 
 # ---------- Fixtures ----------
 
 @pytest.fixture(autouse=True)
 def clear_chunks():
-    """Clean the 'chunks' table before each test."""
     print("\n🧼 Clearing table before test...")
-    with get_connection() as conn:
+    with pooled_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM chunks;")
             conn.commit()
@@ -164,3 +163,8 @@ def test_low_score_for_unrelated_query(seeded_chunks):
     results = search_documents("something totally unrelated", embed_fn=unrelated_embed)
     print_results(results)
     assert results[0]["score"] < 0.3  # Should be low similarity
+
+def test_fewer_results_than_top_k(seeded_chunks, fake_embed_fn):
+    results = search_documents("test query", top_k=20, embed_fn=fake_embed_fn)
+    assert len(results) < 20
+    assert len(results) == 6  
