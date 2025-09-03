@@ -186,7 +186,49 @@ Includes:
 - Cosine similarity search using `pgvector`  
 - End-to-end unit testing with `pytest`  
 
-📘 Example Usage
+
+## 🧪 Two Ways to Use It: Quick CLI vs. Python Import
+### Quick CLI
+📘 Example Usage (Simplified Flow)
+🧱 Step 1: Start the database (Docker)
+Make sure Docker is running, then launch PostgreSQL with pgvector:
+docker-compose up -d
+This will start a PostgreSQL container with the pgvector extension ready.
+
+📄 Step 2: Index a document:
+Use the CLI to extract, chunk, embed, and store a file into the database:
+python index_documents.py samples/sample.docx --strategy fixed 
+Supported formats:
+* .docx
+* .pdf
+
+Supported chunking strategies:
+* fixed
+* sentence
+* paragraph
+
+✅ Output:
+📄 Reading file: sample.docx
+✂️ Splitting text using strategy: fixed
+🧠 Generating embeddings...
+💾 Saving chunks to DB...
+✅ Done!
+
+🔍 Step 3: Run a semantic search query
+Ask a natural language question using:
+python search_documents.py "What is semantic search?"
+✅ Output:
+Semantic search is a powerful technique...   → score: 0.812
+This approach powers recommendation...       → score: 0.792
+
+
+🧼 Optional: Reset the database
+You can clear previous runs with:
+python helper/reset_db.py
+
+
+### Python Import
+📘the other way Example Usage 
 🧾 Step 1: Prepare a sample document
 
 Save your document (e.g., sample.docx) inside the samples/ folder.
